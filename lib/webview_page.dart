@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WebViewPage extends StatefulWidget {
   @override
@@ -13,12 +13,21 @@ class _WebViewPageState extends State<WebViewPage> {
   WebViewController _controller;
   var urlList = [
     "https://www.softvire.com.au/?s=&product_cat=0&post_type=product",
-    "https://softvireaus.force.com/s/"
+    "https://softvireaus.force.com/s/",
+    'https://softvireaus.force.com/s/pay/?source=app'
   ];
 
   @override
   void initState() {
     super.initState();
+  }
+
+  Future<void> _launchInBrowser(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url, forceSafariVC: false, forceWebView: false,enableJavaScript: true,enableDomStorage: true);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   void _onItemTapped(int index) {
@@ -27,8 +36,6 @@ class _WebViewPageState extends State<WebViewPage> {
       setState(() {
         _selectedIndex = index;
         _controller.loadUrl(urlList[index]);
-
-
       });
     }
 
@@ -62,8 +69,10 @@ class _WebViewPageState extends State<WebViewPage> {
           ),
           actions: <Widget>[
             IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.person),
+              onPressed: () {
+                _launchInBrowser(urlList[2]);
+              },
+              icon: Icon(Icons.payment),
             ),
             IconButton(
               onPressed: () {},
@@ -71,12 +80,10 @@ class _WebViewPageState extends State<WebViewPage> {
             ),
           ],
         ),
-        body:  Stack(
+        body: Stack(
           children: <Widget>[
             WebView(
-    
               initialUrl: urlList[_selectedIndex],
-              
               onPageStarted: (url) {
                 print('page started loading');
                 setState(() {
@@ -103,10 +110,9 @@ class _WebViewPageState extends State<WebViewPage> {
                 });
               },
             ),
-            
             Visibility(
               visible: loading,
-                          child: Container(
+              child: Container(
                 color: Colors.white,
                 height: double.infinity,
                 width: double.infinity,
@@ -115,7 +121,6 @@ class _WebViewPageState extends State<WebViewPage> {
                 ),
               ),
             ),
-
           ],
         ));
   }
